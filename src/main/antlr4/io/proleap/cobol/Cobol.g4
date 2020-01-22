@@ -369,7 +369,7 @@ dataDivision
    ;
 
 dataDivisionSection
-   : fileSection | dataBaseSection | workingStorageSection | linkageSection | communicationSection | localStorageSection | screenSection | reportSection | programLibrarySection
+   : fileSection | dataBaseSection | workingStorageSection | basedSection | linkageSection | communicationSection | localStorageSection | screenSection | reportSection | programLibrarySection
    ;
 
 // -- file section ----------------------------------
@@ -496,6 +496,10 @@ linkageSection
    : LINKAGE SECTION DOT_FS dataDescriptionEntry*
    ;
 
+basedSection
+   : BASED SECTION DOT_FS basedDataDescriptionEntry*
+   ;
+
 // -- communication section ----------------------------------
 
 communicationSection
@@ -515,7 +519,7 @@ communicationDescriptionEntryFormat2
    ;
 
 communicationDescriptionEntryFormat3
-   : CD cdName FOR? INITIAL I_O ((messageDateClause | messageTimeClause | symbolicTerminalClause | textLengthClause | endKeyClause | statusKeyClause) | dataDescName)* DOT_FS
+   : CD cdName FOR? INITIAL I_O ((messageDateClause | messageTimeClause | symbolicTerminalClause | textLengthClause | endKeyClause | statusKeyClause) | markClause | dataDescName)* DOT_FS
    ;
 
 destinationCountClause
@@ -550,6 +554,9 @@ statusKeyClause
    : STATUS KEY IS? dataDescName
    ;
 
+markClause
+   : MARK IS? dataDescName
+   ;
 symbolicDestinationClause
    : SYMBOLIC? DESTINATION IS? dataDescName
    ;
@@ -943,6 +950,13 @@ libraryIsGlobalClause
    ;
 
 // data description entry ----------------------------------
+basedDataDescriptionEntry
+   : dataDescriptionEntry | basedFormat1
+   ;
+
+basedFormat1
+   : (INTEGERLITERAL | LEVEL_NUMBER_77) (FILLER | dataName)? BASED ON dataName DOT_FS
+   ;
 
 dataDescriptionEntry
    : dataDescriptionEntryFormat1 | dataDescriptionEntryFormat2 | dataDescriptionEntryFormat3 | dataDescriptionEntryExecSql
@@ -1021,7 +1035,7 @@ pictureString
    ;
 
 pictureChars
-   : DOLLARCHAR | IDENTIFIER | NUMERICLITERAL | SLASHCHAR | COMMACHAR | DOT | COLONCHAR | ASTERISKCHAR | DOUBLEASTERISKCHAR | LPARENCHAR | RPARENCHAR | PLUSCHAR | MINUSCHAR | LESSTHANCHAR | MORETHANCHAR | integerLiteral
+   : DOLLARCHAR | IDENTIFIER | NUMERICLITERAL | SLASHCHAR | BACKSLASHCHAR | COMMACHAR | DOT | COLONCHAR | ASTERISKCHAR | DOUBLEASTERISKCHAR | LPARENCHAR | RPARENCHAR | PLUSCHAR | MINUSCHAR | LESSTHANCHAR | MORETHANCHAR | integerLiteral
    ;
 
 pictureCardinality
@@ -2924,6 +2938,7 @@ LINE : L I N E;
 LINES : L I N E S;
 LINE_COUNTER : L I N E MINUSCHAR C O U N T E R;
 LINKAGE : L I N K A G E;
+BASED : B A S E D;
 LIST : L I S T;
 LOCAL : L O C A L;
 LOCAL_STORAGE : L O C A L MINUSCHAR S T O R A G E;
@@ -2934,6 +2949,7 @@ LOWER : L O W E R;
 LOWLIGHT : L O W L I G H T;
 LOW_VALUE : L O W MINUSCHAR V A L U E;
 LOW_VALUES : L O W MINUSCHAR V A L U E S;
+MARK :M A R K;
 MEMORY : M E M O R Y;
 MERGE : M E R G E;
 MESSAGE : M E S S A G E;
@@ -3196,7 +3212,7 @@ PLUSCHAR : '+';
 SINGLEQUOTE : '\'';
 RPARENCHAR : ')';
 SLASHCHAR : '/';
-
+BACKSLASHCHAR : '\\';
 // literals
 NONNUMERICLITERAL : STRINGLITERAL | DBCSLITERAL | HEXNUMBER  | NULLTERMINATED;
 
@@ -3228,7 +3244,9 @@ INTEGERLITERAL : (PLUSCHAR | MINUSCHAR)? [0-9]+;
 
 NUMERICLITERAL : (PLUSCHAR | MINUSCHAR)? [0-9]* (DOT | COMMACHAR) [0-9]+ (('e' | 'E') (PLUSCHAR | MINUSCHAR)? [0-9]+)?;
 
-IDENTIFIER : [a-zA-Z0-9]+ ([-_]+ [a-zA-Z0-9]+)*;
+IDENTIFIER : [a-zA-Z0-9]+ ([-_]+ [a-zA-Z0-9]+)*
+| ('\u4E00'..'\u9FCF' | '\u30A1'..'\u30F6' | '\u3000'..'\u301C' | '\u3041'..'\u3093' | '\u30FC' | '\uFF01'..'\uFF5D' | '\u30FB' )+
+;
 
 // whitespace, line breaks, comments, ...
 NEWLINE : '\r'? '\n' -> channel(HIDDEN);
