@@ -369,8 +369,9 @@ dataDivision
    ;
 
 dataDivisionSection
-   : fileSection | dataBaseSection | workingStorageSection | basedSection | linkageSection | communicationSection | localStorageSection | screenSection | reportSection | programLibrarySection
+   : fileSection | dataBaseSection | subSchemaSection | workingStorageSection | basedSection | linkageSection | communicationSection | localStorageSection | screenSection | reportSection | programLibrarySection
    ;
+
 
 // -- file section ----------------------------------
 
@@ -474,6 +475,14 @@ reportClause
    : (REPORT IS? | REPORTS ARE?) reportName+
    ;
 
+// -- sub-schema section ----------------------------
+subSchemaSection
+   : SUBSCHEMA SECTION DOT_FS subSchemaDescriptionEntry*
+   ;
+
+subSchemaDescriptionEntry
+   : DB dbName DOT_FS?
+   ;
 // -- data base section ----------------------------------
 
 dataBaseSection
@@ -1175,7 +1184,7 @@ sentence
    ;
 
 statement
-   : acceptStatement | addStatement | alterStatement | callStatement | cancelStatement | closeStatement | computeStatement | continueStatement | deleteStatement | disableStatement | displayStatement | divideStatement | enableStatement | entryStatement | evaluateStatement | exhibitStatement | execCicsStatement | execSqlStatement | execSqlImsStatement | exitStatement | generateStatement | gobackStatement | goToStatement | ifStatement | initializeStatement | initiateStatement | inspectStatement | mergeStatement | moveStatement | multiplyStatement | nextSentenceStatement | openStatement | performStatement | purgeStatement | readStatement | receiveStatement | releaseStatement | returnStatement | rewriteStatement | searchStatement | sendStatement | setStatement | sortStatement | startStatement | stopStatement | stringStatement | subtractStatement | terminateStatement | unstringStatement | writeStatement
+   : acceptStatement | addStatement | alterStatement | callStatement | cancelStatement | closeStatement | computeStatement | continueStatement | deleteStatement | disableStatement | displayStatement | divideStatement | enableStatement | entryStatement | evaluateStatement | exhibitStatement | execCicsStatement | execSqlStatement | execSqlImsStatement | exitStatement | findStatement | generateStatement | gobackStatement | goToStatement | ifStatement | initializeStatement | initiateStatement | inspectStatement | mergeStatement | moveStatement | multiplyStatement | nextSentenceStatement | openStatement | performStatement | purgeStatement | readStatement | receiveStatement | releaseStatement | returnStatement | rewriteStatement | searchStatement | sendStatement | setStatement | sortStatement | startStatement | stopStatement | stringStatement | subtractStatement | terminateStatement | unstringStatement | writeStatement
    ;
 
 // accept statement
@@ -1676,6 +1685,10 @@ mergeGiving
    : fileName (LOCK | SAVE | NO REWIND | CRUNCH | RELEASE | WITH REMOVE CRUNCH)?
    ;
 
+// FIND statement
+findStatement
+: FIND AND GET (FIRST | ANY) recordName WITHIN dbName
+;
 // move statement
 
 moveStatement
@@ -2496,6 +2509,10 @@ dataDescName
    : FILLER | CURSOR | dataName
    ;
 
+dbName
+   : cobolWord
+   ;
+
 environmentName
    : systemName
    ;
@@ -2768,6 +2785,7 @@ DATE_COMPILED : D A T E MINUSCHAR C O M P I L E D;
 DATE_WRITTEN : D A T E MINUSCHAR W R I T T E N;
 DAY : D A Y;
 DAY_OF_WEEK : D A Y MINUSCHAR O F MINUSCHAR W E E K;
+DB: D B;
 DBCS : D B C S;
 DBCLOB : D B C L O B;
 DE : D E;
@@ -2865,6 +2883,7 @@ FILE : F I L E;
 FILE_CONTROL : F I L E MINUSCHAR C O N T R O L;
 FILLER : F I L L E R;
 FINAL : F I N A L;
+FIND : F I N D;
 FIRST : F I R S T;
 FOOTING : F O O T I N G;
 FOR : F O R;
@@ -2876,6 +2895,7 @@ FUNCTION : F U N C T I O N;
 FUNCTIONNAME : F U N C T I O N N A M E;
 FUNCTION_POINTER : F U N C T I O N MINUSCHAR P O I N T E R;
 GENERATE : G E N E R A T E;
+GET : G E T;
 GOBACK : G O B A C K;
 GIVING : G I V I N G;
 GLOBAL : G L O B A L;
@@ -3121,6 +3141,7 @@ STRING : S T R I N G;
 SUB_QUEUE_1 : S U B MINUSCHAR Q U E U E MINUSCHAR '1';
 SUB_QUEUE_2 : S U B MINUSCHAR Q U E U E MINUSCHAR '2';
 SUB_QUEUE_3 : S U B MINUSCHAR Q U E U E MINUSCHAR '3';
+SUBSCHEMA: S U B MINUSCHAR S C H E M A;
 SUBTRACT : S U B T R A C T;
 SUM : S U M;
 SUPPRESS : S U P P R E S S;
@@ -3173,6 +3194,7 @@ WAIT : W A I T;
 WHEN : W H E N;
 WHEN_COMPILED : W H E N MINUSCHAR C O M P I L E D;
 WITH : W I T H;
+WITHIN : W I T H I N;
 WORDS : W O R D S;
 WORKING_STORAGE : W O R K I N G MINUSCHAR S T O R A G E;
 WRITE : W R I T E;
@@ -3244,10 +3266,16 @@ INTEGERLITERAL : (PLUSCHAR | MINUSCHAR)? [0-9]+;
 
 NUMERICLITERAL : (PLUSCHAR | MINUSCHAR)? [0-9]* (DOT | COMMACHAR) [0-9]+ (('e' | 'E') (PLUSCHAR | MINUSCHAR)? [0-9]+)?;
 
-IDENTIFIER : [a-zA-Z0-9]+ ([-_]+ [a-zA-Z0-9]+)*
-| ('\u4E00'..'\u9FCF' | '\u30A1'..'\u30F6' | '\u3000'..'\u301C' | '\u3041'..'\u3093' | '\u30FC' | '\uFF01'..'\uFF5D' | '\u30FB' )+
-;
 
+//IDENTIFIER : [a-zA-Z0-9\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Han}]+ ([-_]+ [a-zA-Z0-9\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Han}]+)*
+
+IDENTIFIER : ALL_CHAR+ ( [-_]+  ALL_CHAR+)*
+;
+// IDENTIFIER : [a-zA-Z0-9]+ ([-_]+ [a-zA-Z0-9]+)*
+// | ('\u4E00'..'\u9FCF' | '\u30A1'..'\u30F6' | '\u3000'..'\u301C' | '\u3041'..'\u3093' | '\u30FC' | '\uFF01'..'\uFF5D' | '\u30FB' )+
+// ;
+ALL_CHAR : ([a-zA-Z0-9] | '\u2212' | '\u4E00'..'\u9FCF' | '\u30A1'..'\u30F6' | '\u3000'..'\u301C' | '\u3041'..'\u3093' | '\u30FC' | '\uFF01'..'\uFF5D' | '\u30FB' )
+;
 // whitespace, line breaks, comments, ...
 NEWLINE : '\r'? '\n' -> channel(HIDDEN);
 EXECCICSLINE : EXECCICSTAG WS ~('\n' | '\r' | '}')* ('\n' | '\r' | '}');

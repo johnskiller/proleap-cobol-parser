@@ -631,7 +631,11 @@ fragment STRINGLITERAL :
 	| '\'' (~['\n\r] | '\'\'' | '"')* '\''
 ;
 
-IDENTIFIER : [a-zA-Z0-9]+ ([-_]+ [a-zA-Z0-9]+)*;
+//IDENTIFIER : [a-zA-Z0-9]+ ([-_]+ [a-zA-Z0-9]+)*;
+IDENTIFIER : [a-zA-Z0-9]+ ([-_]+ [a-zA-Z0-9]+)*
+| ('\u2212' | '\u4E00'..'\u9FCF' | '\u30A1'..'\u30F6' | '\u3000'..'\u301C' | '\u3041'..'\u3093' | '\u30FC' | '\uFF01'..'\uFF5D' | '\u30FB' )+
+;
+
 FILENAME : [a-zA-Z0-9]+ '.' [a-zA-Z0-9]+;
 
 
